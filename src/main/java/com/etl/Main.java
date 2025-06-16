@@ -107,7 +107,8 @@ public class Main {
                     movieToDirectors.computeIfAbsent(tconst, k -> new ArrayList<>()).add(nconst);
                     allNconsts.add(nconst);
                 } else if (category.equals("actors") || category.equals("actress")) {
-                    List<String> topCast = movieToTopCast.computeIfAbsent(tconst, k-> new ArrayList<>()); // returns reference
+                    // return reference
+                    List<String> topCast = movieToTopCast.computeIfAbsent(tconst, k-> new ArrayList<>());
                     if (topCast.size() < 3) {
                         topCast.add(nconst); // adds to the map value at the same time
                         allNconsts.add(nconst);
@@ -116,8 +117,8 @@ public class Main {
             }
         }
 
-        // map id to name for name.basics.ts
-        Map<String, String> nconstToName = new HashMap<>(); // dictonary for nconst to name lookup
+        // dictonary for nconst to name lookup
+        Map<String, String> nconstToName = new HashMap<>();
         try (InputStream is = Main.class.getClassLoader().getResourceAsStream("data/name.basics.tsv");
              Reader in = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
