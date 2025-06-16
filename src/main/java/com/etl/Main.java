@@ -84,7 +84,11 @@ public class Main {
         }
 
         // link people to movies using title.principles.tsv
-        Set<String> neededPeople = new HashSet<>();
+            //tconst - List<nconst>
+        Map<String, List<String >> movieToDirectors = new HashMap<>();
+        Map<String, List<String>> movieToTopCast = new HashMap<>();
+        Set<String> allNconsts = new HashSet<>();
+
         try (InputStream is = Main.class.getClassLoader().getResourceAsStream("data/title.principals.tsv");
             Reader in = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
@@ -96,15 +100,24 @@ public class Main {
             for (CSVRecord record : records) {
                 String tconst = record.get("tconst");
                 String nconst = record.get("nconst");
+                String category = record.get("category");
 
-                if (movies.containsKey(tconst)) {
-                    neededPeople.add(nconst);
+                if (!movies.containsKey(tconst)) {continue;}
+                if (category.equals("director")) {
+                    movieToDirectors.computeIfAbsent(tconst, k -> new ArrayList<>()).add(nconst);
+                    allNconsts.add(nconst);
+                } else if (category.equals("actors") || category.equals("actress")) {
+                    List<String> topCast = movieToTopCast.computeIfAbsent(tconst, k-> new ArrayList<>()); // returns reference
+                    if (topCast.size() < 3) {
+                        topCast.add(nconst); // adds to the map value at the same time
+                        allNconsts.add(nconst);
+                    }
                 }
             }
         }
 
-        // map id to name for name.basics.tsv
-        Map<String, String> people = new HashMap<>();
+        // map id to name for name.basics.ts
+        Map<String, String> nconstToName = new HashMap<>(); // dictonary for nconst to name lookup
         try (InputStream is = Main.class.getClassLoader().getResourceAsStream("data/name.basics.tsv");
              Reader in = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
@@ -113,12 +126,36 @@ public class Main {
                     .withQuote(null)
                     .parse(in);
 
+            int topFive = 0;
             for (CSVRecord record : records) {
                 String nconst = record.get("nconst");
-                if (!neededPeople.contains(nconst)) continue;
+                if (!allNconsts.contains(nconst)) {continue;}
 
                 String primaryName = record.get("primaryName");
-                people.put(nconst, primaryName);
+                nconstToName.put(nconst, primaryName);
+            }
+        }
+
+        // add names of directors and topCasts to movie objects
+        for (var entry : movies.entrySet()) {
+            String tconst = entry.getKey();
+            Movie m = entry.getValue();
+
+            List<String> directorsList = movieToDirectors.get(tconst);
+            if (directorsList != null) {
+                for (String nconst : directorsList) {
+                    String name = nconstToName.get(nconst);
+                    if (name != null) {
+                        m.directors.add(name);
+                    }
+                }
+            }
+            List<String> topCastList = movieToTopCast.get(tconst);
+            if (topCastList != null) {
+                for (String nconst : topCastList) {
+                    String name = nconstToName.get(nconst);
+                    if (name != null) {m.topCast.add(name);}
+                }
             }
         }
 
