@@ -65,7 +65,6 @@ public class Main {
                     .withQuote(null)
                     .parse(in); // adding in the file
 
-            int rated = 0;
             for (var record : records) {
                 String tconst = record.get("tconst");
                 String rating = record.get("averageRating");
@@ -76,11 +75,8 @@ public class Main {
                     Movie m = movies.get(tconst);
                     m.numVotes = numVotes;
                     m.rating = rating;
-                    rated++;
                 }
             }
-            System.out.println("✅ Movies with ratings: " + rated);
-
         }
 
         // link people to movies using title.principles.tsv
@@ -184,7 +180,7 @@ public class Main {
                 );
                 printed++;
             }
-            System.out.println("✅ Total written to CSV: " + printed);
+            System.out.println("Total written to CSV: " + printed);
         }
         System.out.println("Cleaned CSV generated at: " + outputFile.getAbsolutePath());
 
