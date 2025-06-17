@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
@@ -172,7 +173,8 @@ public class Main {
                         sanitize(movie.tconst),
                         sanitize(movie.title),
                         sanitize(movie.year),
-                        sanitize(movie.genre),
+                        //sanitize(movie.genre),
+                        sanitizeGenre(movie.genre),
                         sanitize(movie.rating),
                         sanitize(movie.numVotes),
                         String.join(" | ", movie.directors),
@@ -184,6 +186,15 @@ public class Main {
         }
         System.out.println("Cleaned CSV generated at: " + outputFile.getAbsolutePath());
 
+    }
+    private static String sanitizeGenre(String genres) {
+        if (genres == null || genres.equals("\\N")) {
+            return "";
+        }
+        return Arrays.stream(genres.split(","))
+                .map(String::trim)
+                .filter(g -> !g.isEmpty())
+                .collect(Collectors.joining(", "));
     }
     private static String sanitize(String s) {
         return s == null ? "" : s.replaceAll("[\",]", "").trim();
